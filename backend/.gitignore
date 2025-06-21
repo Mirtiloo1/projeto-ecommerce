@@ -1,0 +1,63 @@
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Arquivos de ambiente (nunca versionar!)
+.env
+*.env
+.env.local
+.env*.local
+
+**/secrets.yml
+**/credentials.json
+**/config/aws-keys.*
+**/jwt-secret.key
+
+
+# Configurações específicas de desenvolvimento
+application-dev.properties
+application-prod.properties
+
+# AWS e outros segredos
+*.secret
+*.key
+*.pem
+*.cer
+
+# Arquivos do IDE/Editor (opcional, mas recomendado)
+.idea/
+.vscode/
+*.iml
+*.log
+bin/
+build/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/

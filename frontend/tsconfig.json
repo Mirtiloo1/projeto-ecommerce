@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "forceConsistentCasingInFileNames": true,
+    "strict": true, // Mude para false se estiver usando JavaScript
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowJs": true // Adicione isso para permitir arquivos JavaScript
+  },
+  "include": ["src/**/*"], // Padrão mais abrangente
+  "exclude": ["node_modules"]
+}
