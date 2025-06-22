@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,7 +21,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -34,7 +34,6 @@ public class SecurityConfig {
     public SecurityConfig(UserDetailsService userDetailsService, JwtAuthFilter jwtAuthFilter) {
         this.userDetailsService = userDetailsService;
         this.jwtAuthFilter = jwtAuthFilter;
-
     }
 
     @Bean
@@ -57,7 +56,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // URL do seu frontend (Vite)
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -70,14 +69,27 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/produtos/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/produtos/upload-imagem").permitAll() // Ou hasRole('ADMIN')
+                        .requestMatchers("/uploads/**").permitAll() // Permite ver as imagens salvas
+
+                        // Qualquer um pode ver os produtos
+                        .requestMatchers(HttpMethod.GET, "/api/produtos/**").permitAll()
+
+                        // Apenas ADMIN pode criar, atualizar ou deletar produtos
+                        .requestMatchers(HttpMethod.POST, "/api/produtos").permitAll()// MUDAR TODOS PARA ADMIN!!!!!!!!!!!!!!
+                        .requestMatchers(HttpMethod.POST, "/api/produtos/upload-imagem").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/produtos/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/produtos/**").hasRole("USER")
+
+                        // Outras rotas como carrinho e pedido precisam de autenticação
+                        .requestMatchers("/api/carrinho/**").authenticated()
+                        .requestMatchers("/api/pedidos/**").authenticated()
+
+                        // Qualquer outra requisição precisa de autenticação
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
