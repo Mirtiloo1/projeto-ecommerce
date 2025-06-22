@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Navbar from "../../components/Navbar";
+import Navbar from "@/components/Navbar";
 import { getProdutos } from "@/services/api";
 import AdicionarProduto from "@/components/AdicionarProduto";
 
@@ -7,21 +7,27 @@ function HomePage() {
   const [produtos, setProdutos] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // 1. Função dedicada para buscar os produtos, que pode ser chamada a qualquer momento
+  const carregarProdutos = async () => {
+    try {
+      setLoading(true); // Mostra o carregamento sempre que buscar
+      const dados = await getProdutos();
+      setProdutos(dados);
+    } catch (error) {
+      console.error("Falha ao carregar produtos:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 2. O useEffect chama a função de carregar na montagem inicial do componente
   useEffect(() => {
-    const carregarProdutos = async () => {
-      try {
-        const dados = await getProdutos();
-        setProdutos(dados);
-      } catch (error) {
-        console.error("Falha ao carregar produtos:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     carregarProdutos();
   }, []);
 
-  if (loading) {
+  // O if (loading) pode ser removido ou ajustado conforme sua preferência,
+  // mas é útil para o primeiro carregamento.
+  if (loading && produtos.length === 0) {
     return (
       <div className="font-roboto min-h-screen flex flex-col">
         <Navbar />
@@ -36,7 +42,8 @@ function HomePage() {
     <div className="font-roboto min-h-screen flex flex-col">
       <Navbar />
 
-      <AdicionarProduto />
+      {/* 3. Passamos a função 'carregarProdutos' como uma propriedade (prop) */}
+      <AdicionarProduto onProdutoAdicionado={carregarProdutos} />
 
       <main className="flex-1">
         <div className="container px-4 sm:px-6 lg:px-8 py-8 mx-auto">
@@ -59,7 +66,7 @@ function HomePage() {
                     {produto.nome}
                   </h3>
                   <p className="text-neutral-600 font-bold">
-                    R$ {produto.preco.toFixed(2)}
+                    R$ {produto.preco ? produto.preco.toFixed(2) : "0.00"}
                   </p>
                 </div>
               </div>
